@@ -1,6 +1,3 @@
-import java.awt.*;
-import java.awt.List;
-import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -28,7 +25,8 @@ public class Main {
 						{'X',' ','X','X',' ','X',' ','X',' ','X'},
 						{'X',' ','X','X',' ',' ',' ',' ',' ','X'},
 						{'X','X','X','X','X','X','X','X','X','X'}};
-		
+		mapGeneration(7);
+        /*
 		printMap(map,10);
 
 		while(!(heroRow == 5 && heroColumn == 9 && hero == 'A')){
@@ -69,7 +67,7 @@ public class Main {
 			printMap(map,10);
 		}
 		System.out.println(dragon ? "You died." : "You have reached the exit");
-		System.out.println("The end.");
+		System.out.println("The end.");*/
 	}
 	
 	public static void newPosition(char[][] map){
@@ -118,9 +116,15 @@ public class Main {
 			map[dragonRow][dragonColumn] = 'F';
 
 		// print the map
+        System.out.print("  ");
+        for(int i = 0; i < n; i++){
+            System.out.print(i + " ");
+        }
+        System.out.print('\n');
 		for(int i = 0; i < n; i++){
+            System.out.print(i + " ");
 			for (int j = 0; j < n; j++){
-				System.out.print(map[i][j]);
+				System.out.print(map[i][j] + " ");
 			}
 			System.out.print('\n');
 		}
@@ -172,36 +176,79 @@ public class Main {
 	}
 
 	public static char[][] mapGeneration(int n){
-        int startX = 1;
-        int startY = 1;
-        int randomNum;
-        int wallX;
-        int wallY;
-		char map[][] = new char[n][n];	// Initialize the matrix
-		for(int i = 0,j = 0; i < n && j < n ; i++,j++ ){	// Start with all walls
-			map[i][j] = 'X';
-		}
-
-        map[startX][startY] = ' '; // start cell
-
-        int walls[][] = {{startX - 1,startY},{startX,startY - 1},{startX + 1,startY},{startX,startY + 1}};
-
+        int randomNum, visitedCellsSize = (n-1)/2;
+		char map[][] = new char[n][n];
+        char visitedCells[][] = new char[visitedCellsSize][visitedCellsSize];
+        Stack<Integer> stack = new Stack<Integer>();
         Random rand = new Random();
 
-
-        while(walls.length != 0){
-            randomNum = rand.nextInt(walls.length);
-            wallX = startX + 2 * walls[randomNum][0];
-            wallY = startY + 2 * walls[randomNum][1];
-            if(wallX <= 0 || wallY <= 0 || wallX > n || wallY > n){
-                Arrays.asList(walls); // para acabar
-                continue;
-            }
-
-            if (map[wallX][wallY] == ' ' ){
-
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (i%2 == 0 || j%2 == 0){
+                    map[i][j] = 'X';
+                    continue;
+                }
+                visitedCells[(i-1)/2][(j-1)/2] = '.';
+                map[i][j] = ' ';
             }
         }
+
+        randomNum = rand.nextInt(visitedCellsSize - 1);
+
+        if (rand.nextInt(2) == 0){
+            int y = rand.nextInt(2) * (visitedCellsSize - 1);
+            visitedCells[y][randomNum] = '+';
+            stack.add(randomNum);
+            stack.add(y);
+            map[y*2 + 1][randomNum*2 + 1] = '+';
+            if (2*y == 0){
+                map[0][randomNum*2 + 1] = 'S';
+            }
+            else {
+                map[2*y + 2][randomNum*2 + 1] = 'S';
+            }
+        }
+        else {
+            int x = rand.nextInt(2) * (visitedCellsSize - 1);
+            visitedCells[randomNum][x] = '+';
+            stack.push(x);
+            stack.push(randomNum);
+            map[randomNum*2 + 1][x*2 + 1] = '+';
+            if (2*x == 0){
+                map[randomNum*2 + 1][0] = 'S';
+            }
+            else {
+                map[randomNum*2 + 1][2*x + 2] = 'S';
+            }
+        }
+
+
+        System.out.print("  ");
+        for(int i = 0; i < n; i++){
+            System.out.print(i + " ");
+        }
+        System.out.print('\n');
+        for(int i = 0; i < n; i++){
+            System.out.print(i + " ");
+            for (int j = 0; j < n; j++){
+                System.out.print(map[i][j] + " ");
+            }
+            System.out.print('\n');
+        }
+
+        System.out.print("\n  ");
+        for(int i = 0; i < (n-1)/2; i++){
+            System.out.print(i + " ");
+        }
+        System.out.print('\n');
+        for(int i = 0; i < (n-1)/2; i++){
+            System.out.print(i + " ");
+            for (int j = 0; j < (n-1)/2; j++){
+                System.out.print(visitedCells[i][j] + " ");
+            }
+            System.out.print('\n');
+        }
+
 		return map;
 	}
 }
