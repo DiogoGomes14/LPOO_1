@@ -182,6 +182,8 @@ public class Main {
         Stack<Integer> stack = new Stack<Integer>();
         Random rand = new Random();
 
+
+        // used to fill a 2d array with odd cells empty
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (i%2 == 0 || j%2 == 0){
@@ -193,14 +195,19 @@ public class Main {
             }
         }
 
+
+        // Selecting initial position and exit
         randomNum = rand.nextInt(visitedCellsSize - 1);
 
         if (rand.nextInt(2) == 0){
             int y = rand.nextInt(2) * (visitedCellsSize - 1);
             visitedCells[y][randomNum] = '+';
-            stack.add(randomNum);
-            stack.add(y);
+
+            stack.push(randomNum);
+            stack.push(y);
+
             map[y*2 + 1][randomNum*2 + 1] = '+';
+
             if (2*y == 0){
                 map[0][randomNum*2 + 1] = 'S';
             }
@@ -211,9 +218,12 @@ public class Main {
         else {
             int x = rand.nextInt(2) * (visitedCellsSize - 1);
             visitedCells[randomNum][x] = '+';
+
             stack.push(x);
             stack.push(randomNum);
+
             map[randomNum*2 + 1][x*2 + 1] = '+';
+
             if (2*x == 0){
                 map[randomNum*2 + 1][0] = 'S';
             }
@@ -222,7 +232,67 @@ public class Main {
             }
         }
 
+        int x, y;
+        boolean flag = false;
+        while (!stack.empty()){
+            y = stack.peek();
+            stack.pop();
+            x = stack.peek();
+            stack.push(y);
+            switch (rand.nextInt(4)){
+                case 0:
+                    if(visitedCells[y][x + 1] == '.'){
+                        visitedCells[y][x + 1] = '+';
+                        map[y * 2 + 1][x * 2 + 2] = ' ';
+                        flag = true;
+                        stack.push(x + 1);
+                        stack.push(y);
+                    }
+                    break;
+                case 1:
+                    if(visitedCells[y][x - 1] == '.'){
+                        visitedCells[y][x - 1] = '+';
+                        map[y * 2 + 1][x * 2] = ' ';
+                        flag = true;
+                        stack.push(x - 1);
+                        stack.push(y);
+                    }
+                    break;
+                case 2:
+                    if(visitedCells[y + 1][x] == '.'){
+                        visitedCells[y + 1][x] = '+';
+                        map[y * 2 + 2][x * 2 + 1] = ' ';
+                        flag = true;
+                        stack.push(x);
+                        stack.push(y + 1);
+                    }
+                    break;
+                case 3:
+                    if(visitedCells[y - 1][x] == '.'){
+                        visitedCells[y - 1][x] = '+';
+                        map[y * 2][x * 2 + 1] = ' ';
+                        flag = true;
+                        stack.push(x);
+                        stack.push(y - 1);
+                    }
+                    break;
+            }
 
+            //possivelmente mudar de lugar
+            if (!flag){
+                continue;
+            }
+
+            // rever
+            if (visitedCells[y - 1][x] == '+' && visitedCells[y + 1][x] == '+' && visitedCells[y][x + 1] == '+' && visitedCells[y][x - 1] == '+'){
+                stack.pop();
+                stack.pop();
+            }
+
+            // para continuar
+        }
+
+        // maze generation auxiliary prints
         System.out.print("  ");
         for(int i = 0; i < n; i++){
             System.out.print(i + " ");
