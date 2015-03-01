@@ -241,7 +241,7 @@ public class Main {
             stack.push(y);
             switch (rand.nextInt(4)){
                 case 0:
-                    if(visitedCells[y][x + 1] == '.'){
+                    if(visitedCells[y][x + 1] == '.'){ // bugs here repeatedly
                         visitedCells[y][x + 1] = '+';
                         map[y * 2 + 1][x * 2 + 2] = ' ';
                         flag = true;
