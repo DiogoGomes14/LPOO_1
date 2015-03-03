@@ -1,7 +1,5 @@
 package maze.cli;
 
-import maze.logic.Maze;
-
 public class Output {
     public static void printMap(char[][] maze, int size){
 

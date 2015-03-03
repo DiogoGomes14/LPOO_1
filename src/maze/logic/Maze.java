@@ -34,7 +34,6 @@ public class Maze {
         Stack<Integer> stack = new Stack<Integer>();
         Random rand = new Random();
 
-
         // used to fill a 2d array with odd cells empty
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
@@ -47,109 +46,118 @@ public class Maze {
             }
         }
 
-
         // Selecting initial position and exit
         randomNum = rand.nextInt(visitedCellsSize - 1);
 
         if (rand.nextInt(2) == 0){
-            int y = rand.nextInt(2) * (visitedCellsSize - 1);
-            visitedCells[y][randomNum] = '+';
+            int row = rand.nextInt(2) * (visitedCellsSize - 1);
+            visitedCells[row][randomNum] = '+';
 
             stack.push(randomNum);
-            stack.push(y);
+            stack.push(row);
 
-            maze[y*2 + 1][randomNum*2 + 1] = '+';
-
-            if (2*y == 0){
+            if (2*row == 0){
                 maze[0][randomNum*2 + 1] = 'S';
             }
             else {
-                maze[2*y + 2][randomNum*2 + 1] = 'S';
+                maze[2*row + 2][randomNum*2 + 1] = 'S';
             }
         }
         else {
-            int x = rand.nextInt(2) * (visitedCellsSize - 1);
-            visitedCells[randomNum][x] = '+';
+            int column = rand.nextInt(2) * (visitedCellsSize - 1);
+            visitedCells[randomNum][column] = '+';
 
-            stack.push(x);
+            stack.push(column);
             stack.push(randomNum);
 
-            maze[randomNum*2 + 1][x*2 + 1] = '+';
-
-            if (2*x == 0){
+            if (2*column == 0){
                 maze[randomNum*2 + 1][0] = 'S';
             }
             else {
-                maze[randomNum*2 + 1][2*x + 2] = 'S';
+                maze[randomNum*2 + 1][2*column + 2] = 'S';
             }
         }
 
-        int x, y;
-        boolean flag = false;
+        int column, row;
+        boolean[] check = {false,false,false,false}; // used to check if all 4 directions where tried and failed
         while (!stack.empty()){
-            y = stack.peek();
-            stack.pop();
-            x = stack.peek();
-            stack.push(y);
-            switch (rand.nextInt(4)){
-                case 0:
-                    if(visitedCells[y][x + 1] == '.'){ // bugs here repeatedly
-                        visitedCells[y][x + 1] = '+';
-                        maze[y * 2 + 1][x * 2 + 2] = ' ';
-                        flag = true;
-                        stack.push(x + 1);
-                        stack.push(y);
-                    }
-                    break;
-                case 1:
-                    if(visitedCells[y][x - 1] == '.'){
-                        visitedCells[y][x - 1] = '+';
-                        maze[y * 2 + 1][x * 2] = ' ';
-                        flag = true;
-                        stack.push(x - 1);
-                        stack.push(y);
-                    }
-                    break;
-                case 2:
-                    if(visitedCells[y + 1][x] == '.'){
-                        visitedCells[y + 1][x] = '+';
-                        maze[y * 2 + 2][x * 2 + 1] = ' ';
-                        flag = true;
-                        stack.push(x);
-                        stack.push(y + 1);
-                    }
-                    break;
-                case 3:
-                    if(visitedCells[y - 1][x] == '.'){
-                        visitedCells[y - 1][x] = '+';
-                        maze[y * 2][x * 2 + 1] = ' ';
-                        flag = true;
-                        stack.push(x);
-                        stack.push(y - 1);
-                    }
-                    break;
-            }
+            row = stack.pop();
+            column = stack.peek();
+            stack.push(row);
 
-            //possivelmente mudar de lugar
-            if (!flag){
-                continue;
-            }
-
-            // rever
-            if (visitedCells[y - 1][x] == '+' && visitedCells[y + 1][x] == '+' && visitedCells[y][x + 1] == '+' && visitedCells[y][x - 1] == '+'){
+            if (check[0] && check[1] && check[2] && check[3]){
                 stack.pop();
                 stack.pop();
+                check[0] = check[1] = check[2] = check[3] = false;
             }
 
-            // para continuar
+            int r = rand.nextInt(4);
+            switch (r){
+                case 0:  // right
+                    check[0] = true;
+                    if(column + 1 < visitedCellsSize && visitedCells[row][column + 1] == '.'){
+                        visitedCells[row][column + 1] = '+';
+                        maze[row * 2 + 1][column * 2 + 2] = ' ';
+                        stack.push(column + 1);
+                        stack.push(row);
+                        check[0] = check[1] = check[2] = check[3] = false;
+                    }
+                    break;
+                case 1: // left
+                    check[1] = true;
+                    if(column - 1 >= 0 && visitedCells[row][column - 1] == '.'){
+                        visitedCells[row][column - 1] = '+';
+                        maze[row * 2 + 1][column * 2] = ' ';
+                        stack.push(column - 1);
+                        stack.push(row);
+                        check[0] = check[1] = check[2] = check[3] = false;
+                    }
+                    break;
+                case 2: // down
+                    check[2] = true;
+                    if(row + 1 < visitedCellsSize && visitedCells[row + 1][column] == '.'){
+                        visitedCells[row + 1][column] = '+';
+                        maze[row * 2 + 2][column * 2 + 1] = ' ';
+                        stack.push(column);
+                        stack.push(row + 1);
+                        check[0] = check[1] = check[2] = check[3] = false;
+                    }
+                    break;
+                case 3: // up
+                    check[3] = true;
+                    if(row - 1 >= 0 && visitedCells[row - 1][column] == '.'){
+                        visitedCells[row - 1][column] = '+';
+                        maze[row * 2][column * 2 + 1] = ' ';
+                        stack.push(column);
+                        stack.push(row - 1);
+                        check[0] = check[1] = check[2] = check[3] = false;
+                    }
+                    break;
+            }
+/*
+            int i = 0;
+            for (int s : stack){
+                i++;
+                System.out.print(s + " ");
+                if(i%2 == 0){
+                    System.out.print("| ");
+                }
+            }
+            System.out.print('\n');
+
+            System.out.print(column + "-" + row + " | " + r + ":\n");
+            Output.printMap(visitedCells,visitedCellsSize);
+            System.out.print('\n');
+*/
+
         }
-
+/*
         Output.printMap(maze,size);
 
         System.out.print("\n");
 
         Output.printMap(visitedCells,visitedCellsSize);
-
+*/
     }
 
     public int getRow(){

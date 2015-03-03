@@ -16,4 +16,18 @@ public class Input {
         //s.close();
         return ch;
     }
+
+    public static int getNumber(){
+        int number = 0;
+        Scanner s = new Scanner(System.in);
+        try {
+            number = s.nextInt();
+            //System.out.println(ch);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        //s.close();
+        return number;
+    }
 }

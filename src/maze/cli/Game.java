@@ -3,21 +3,64 @@ package maze.cli;
 import maze.logic.Maze;
 import maze.logic.*;
 
+import java.util.Random;
+
 
 public class Game {
     private Dragon dragon = new Dragon();
     private Sword sword = new Sword();
     private Player player = new Player();
-    private Maze maze = new Maze();
+    private Maze maze;
 
     public Game() {
-        dragon.setRow(4);
-        dragon.setColumn(1);
-        sword.setRow(8);
-        sword.setColumn(1);
-        player.setRow(1);
-        player.setColumn(1);
+        System.out.println("Type 0 if you want to play in the predefined maze or a different number to play in a random one: ");
+        int n = Input.getNumber();
+        if( n == 0 ){
+            maze = new Maze();
+            dragon.setRow(4);
+            dragon.setColumn(1);
+            sword.setRow(8);
+            sword.setColumn(1);
+            player.setRow(1);
+            player.setColumn(1);
+        }
+        else {
+            do {
+                System.out.println("Type in the size of the maze(odd number, > 8 and < 100: ");
+                n = Input.getNumber();
+            } while (!(n > 8 && n < 100 && n % 2 != 0));
+            maze = new Maze(n);
+            int randRow, randCol;
+            Random rand = new Random();
+            do {
+                randRow = rand.nextInt(n);
+                randCol = rand.nextInt(n);
+                if(maze.getMaze(randRow,randCol) == ' '){
+                    player.setRow(randRow);
+                    player.setColumn(randCol);
+                }
+            } while (player.getColumn() == 0 && player.getRow() == 0);
+            do {
+                randRow = rand.nextInt(n);
+                randCol = rand.nextInt(n);
+                if(maze.getMaze(randRow,randCol) == ' ' && randRow != player.getRow() && randCol != player.getColumn()){
+                    sword.setRow(randRow);
+                    sword.setColumn(randCol);
+                }
+            } while (sword.getColumn() == 0 && sword.getRow() == 0);
+            do {
+                randRow = rand.nextInt(n);
+                randCol = rand.nextInt(n);
+                if(maze.getMaze(randRow,randCol) == ' ' && randRow != player.getRow() && randCol != player.getColumn() && randRow != sword.getRow() && randCol != sword.getColumn()){
+                    player.setRow(randRow);
+                    player.setColumn(randCol);
+                }
+            } while (sword.getColumn() == 0 && sword.getRow() == 0);
 
+        }
+    }
+
+    public void play(){
         calculateBoard();
 
         while (!(player.getRow() == maze.getRow() && player.getColumn() == maze.getColumn() && player.getHero() == 'A' && !dragon.getAlive())) {
@@ -34,9 +77,9 @@ public class Game {
 
 
             if ((player.getRow() == dragon.getRow() + 1 && player.getColumn() == dragon.getColumn())
-                || (player.getRow() == dragon.getRow() - 1 && player.getColumn() == dragon.getColumn())
-                || (player.getRow() == dragon.getRow() && player.getColumn() == dragon.getColumn() + 1)
-                || (player.getRow() == dragon.getRow() && player.getColumn() == dragon.getColumn() - 1))
+                    || (player.getRow() == dragon.getRow() - 1 && player.getColumn() == dragon.getColumn())
+                    || (player.getRow() == dragon.getRow() && player.getColumn() == dragon.getColumn() + 1)
+                    || (player.getRow() == dragon.getRow() && player.getColumn() == dragon.getColumn() - 1))
             {
                 // if the hero doesn't have a sword when next to the Dragon print the map and end the game (die)
                 if(player.getHero() != 'A'){
