@@ -57,10 +57,10 @@ public class Maze {
             stack.push(row);
 
             if (2*row == 0){
-                maze[0][randomNum*2 + 1] = 'S';
+                maze[(this.row = 0)][(this.column = randomNum*2 + 1)] = 'S';
             }
             else {
-                maze[2*row + 2][randomNum*2 + 1] = 'S';
+                maze[(this.row = 2*row + 2)][(this.column = randomNum*2 + 1)] = 'S';
             }
         }
         else {
@@ -71,10 +71,10 @@ public class Maze {
             stack.push(randomNum);
 
             if (2*column == 0){
-                maze[randomNum*2 + 1][0] = 'S';
+                maze[(this.row = randomNum*2 + 1)][(this.column = 0)] = 'S';
             }
             else {
-                maze[randomNum*2 + 1][2*column + 2] = 'S';
+                maze[(this.row = randomNum*2 + 1)][(this.column = 2*column + 2)] = 'S';
             }
         }
 
@@ -134,7 +134,7 @@ public class Maze {
                     }
                     break;
             }
-/*
+            /*
             int i = 0;
             for (int s : stack){
                 i++;
@@ -148,16 +148,16 @@ public class Maze {
             System.out.print(column + "-" + row + " | " + r + ":\n");
             Output.printMap(visitedCells,visitedCellsSize);
             System.out.print('\n');
-*/
+            */
 
         }
-/*
+        /*
         Output.printMap(maze,size);
 
         System.out.print("\n");
 
-        Output.printMap(visitedCells,visitedCellsSize);
-*/
+        Output.printMap(visitedCells, visitedCellsSize);
+        */
     }
 
     public int getRow(){

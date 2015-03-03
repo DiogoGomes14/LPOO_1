@@ -4,6 +4,13 @@ import java.util.Random;
 
 public class Dragon extends Maze {
     protected boolean alive = true;
+    private int timeSleep = 0;
+    private char dragon = 'D';
+
+    public Dragon(){
+        this.column = 0;
+        this.row = 0;
+    }
 
     public void dragonMovement(Maze maze){
         // generate a random number and if equivalent move made it go to the wall don't move it
@@ -41,4 +48,17 @@ public class Dragon extends Maze {
         this.alive = alive;
     }
 
+    public char getDragon(){
+        return dragon;
+    }
+    public void setDragon(char dragon){
+        this.dragon =  dragon;
+    }
+
+    public int getTimeSleep(){
+        return timeSleep;
+    }
+    public void setTimeSleep(int timeSleep){
+        this.timeSleep = timeSleep;
+    }
 }

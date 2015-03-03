@@ -32,30 +32,36 @@ public class Game {
             maze = new Maze(n);
             int randRow, randCol;
             Random rand = new Random();
-            do {
+            while (player.getColumn() == 0 && player.getRow() == 0) {
                 randRow = rand.nextInt(n);
                 randCol = rand.nextInt(n);
+                System.out.println("A");
                 if(maze.getMaze(randRow,randCol) == ' '){
                     player.setRow(randRow);
                     player.setColumn(randCol);
+                    System.out.println("1");
                 }
-            } while (player.getColumn() == 0 && player.getRow() == 0);
-            do {
+            }
+            while (sword.getColumn() == 0 && sword.getRow() == 0) {
                 randRow = rand.nextInt(n);
                 randCol = rand.nextInt(n);
+                System.out.println("B");
                 if(maze.getMaze(randRow,randCol) == ' ' && randRow != player.getRow() && randCol != player.getColumn()){
                     sword.setRow(randRow);
                     sword.setColumn(randCol);
+                    System.out.println("2");
                 }
-            } while (sword.getColumn() == 0 && sword.getRow() == 0);
-            do {
+            }
+            while (dragon.getColumn() == 0 && dragon.getRow() == 0) {
                 randRow = rand.nextInt(n);
                 randCol = rand.nextInt(n);
+                System.out.println("C");
                 if(maze.getMaze(randRow,randCol) == ' ' && randRow != player.getRow() && randCol != player.getColumn() && randRow != sword.getRow() && randCol != sword.getColumn()){
-                    player.setRow(randRow);
-                    player.setColumn(randCol);
+                    dragon.setRow(randRow);
+                    dragon.setColumn(randCol);
+                    System.out.println("3");
                 }
-            } while (sword.getColumn() == 0 && sword.getRow() == 0);
+            }
 
         }
     }
@@ -63,16 +69,29 @@ public class Game {
     public void play(){
         calculateBoard();
 
+        int i = 0;
+        Random rand = new Random();
+
         while (!(player.getRow() == maze.getRow() && player.getColumn() == maze.getColumn() && player.getHero() == 'A' && !dragon.getAlive())) {
             // ask for the next player move
             player.newPosition(maze, dragon);
-
             // if the player is in the same position as the sword change the 'H' to 'A'
             if (player.getRow() == sword.getRow() && player.getColumn() == sword.getColumn())
                 player.setHero('A');
 
+            if (dragon.getDragon() == 'd' && i < dragon.getTimeSleep())
+                i++;
+            else if (i >= dragon.getTimeSleep() && dragon.getDragon() == 'd'){
+                i = 0;
+                dragon.setDragon('D');
+            }
+
+            if (dragon.getDragon() == 'D' && rand.nextInt(5) == 0){
+                dragon.setDragon('d');
+                dragon.setTimeSleep(rand.nextInt(3) + 2);
+            }
             // if the Dragon is alive calculate next Dragon position
-            if (dragon.getAlive())
+            if (dragon.getAlive() && dragon.getDragon() == 'D')
                 dragon.dragonMovement(maze);
 
 
@@ -92,6 +111,12 @@ public class Game {
                     dragon.setAlive(false);
             }
             calculateBoard();
+            /*
+            System.out.println("dragon: " + dragon.getAlive() + " " + dragon.getRow() + "-" + dragon.getColumn());
+            System.out.println("player: " + player.getHero() + " " + player.getRow() + "-" + player.getColumn());
+            System.out.println("exit: " + maze.getRow() + "-" + maze.getColumn());
+            System.out.println("sword: " + sword.getRow() + "-" + sword.getColumn());
+            */
         }
         System.out.println(dragon.getAlive() ? "You died." : "You have reached the exit");
         System.out.println("The end.");
@@ -104,7 +129,7 @@ public class Game {
 
         // insert the Dragon on the map
         if (dragon.getAlive())
-            maze.setMaze(dragon.getRow(),dragon.getColumn(), 'D');
+            maze.setMaze(dragon.getRow(),dragon.getColumn(), dragon.getDragon());
 
         // check if the Dragon is in the same place as the sword and change that location to 'F'
         if (dragon.getRow() == sword.getRow() && dragon.getColumn() == sword.getColumn())

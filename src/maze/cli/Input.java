@@ -5,6 +5,9 @@ import java.util.Scanner;
 public class Input {
     public static char getPlayerMove(){
         char ch = '0';
+
+        System.out.println("Make a move (left,right,up,down):");
+
         Scanner s = new Scanner(System.in);
         try {
             ch = s.findInLine("[lrud]").charAt(0);
