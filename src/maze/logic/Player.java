@@ -9,26 +9,26 @@ public class Player extends Maze {
         this.column = 0;
         this.row = 0;
     }
-    public void newPosition(Maze maze, Dragon dragon){
+    public void newPosition(Maze maze, boolean deadDragons){
 
         char ch = Input.getPlayerMove();
         //System.out.println(ch);
 
         switch (ch){
             case 'l':
-                if(maze.getMaze(row,column - 1) == ' ' || ((column - 1 == maze.getColumn()) && row == maze.getRow() && !dragon.alive && hero == 'A') )
+                if(maze.getMaze(row,column - 1) == ' ' || ((column - 1 == maze.getColumn()) && row == maze.getRow() && deadDragons && hero == 'A') )
                     column--;
                 break;
             case 'r':
-                if(maze.getMaze(row,column + 1) == ' ' || ((column + 1 == maze.getColumn()) && row == maze.getRow() && !dragon.alive && hero == 'A') )
+                if(maze.getMaze(row,column + 1) == ' ' || ((column + 1 == maze.getColumn()) && row == maze.getRow() && deadDragons && hero == 'A') )
                     column++;
                 break;
             case 'u':
-                if(maze.getMaze(row - 1,column) == ' ' || (column == maze.getColumn() && (row - 1 == maze.getRow()) && !dragon.alive && hero == 'A') )
+                if(maze.getMaze(row - 1,column) == ' ' || (column == maze.getColumn() && (row - 1 == maze.getRow()) && deadDragons && hero == 'A') )
                     row--;
                 break;
             case 'd':
-                if(maze.getMaze(row + 1,column) == ' ' || (column == maze.getColumn() && (row + 1 == maze.getRow()) && !dragon.alive && hero == 'A') )
+                if(maze.getMaze(row + 1,column) == ' ' || (column == maze.getColumn() && (row + 1 == maze.getRow()) && deadDragons && hero == 'A') )
                     row++;
                 break;
             default:

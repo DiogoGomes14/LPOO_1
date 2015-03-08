@@ -40,6 +40,22 @@ public class Dragon extends Maze {
         }
     }
 
+    public int sleepCalculation(int time){
+        Random rand = new Random();
+        if (dragon == 'd' && time < timeSleep)
+            time++;
+        else if (time >= timeSleep && dragon == 'd'){
+            time = 0;
+            this.dragon = 'D';
+        }
+
+        if (dragon == 'D' && rand.nextInt(5) == 0){
+            dragon = 'd';
+            timeSleep = rand.nextInt(3) + 2;
+        }
+        return time;
+    }
+
     public boolean getAlive(){
         return alive;
     }
