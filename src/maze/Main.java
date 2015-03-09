@@ -1,32 +1,48 @@
 package maze;
 
-import maze.cli.Game;
+import maze.logic.Game;
 import maze.cli.Input;
-import maze.logic.Maze;
 
 public class Main {
     public static void main(String[] args) {
+
         System.out.println("Welcome.");
-        System.out.println("Type 0 if you want to play in the predefined maze or a different number to play in a random one: ");
+        System.out.println("Type 0 for a predefined maze, 1 to play in a random maze with one dragon or anything else for a random maze with a certain number of dragons: ");
+        int dm = 0;
         int n = Input.getNumber();
         Game game;
         if(n == 0){
             game = new Game();
         }
-        else if(n == 1){
+        else{
+            int size;
             do {
-                System.out.println("Type in the size of the maze(odd number, > 8 and < 100: ");
-                n = Input.getNumber();
-            } while (!(n > 8 && n < 100 && n % 2 != 0));
-            game = new Game(n);
-        }
-        else {
-            System.out.println("Number of dragons: ");
-            int d = Input.getNumber();
-            game = new Game(n,d);
+                System.out.println("Type in the size of the maze(odd number, > 8 and < 100): ");
+                size = Input.getNumber();
+            } while (!(size > 8 && size < 100 && size % 2 != 0));
+
+            if(n == 1){
+                do {
+                    System.out.println("Type in 0 for Immobile dragon, 1 for random movement or 2 for dragon movement and sleep mechanism: ");
+                    dm = Input.getNumber();
+                } while (!(dm >= 0 && dm < 3));
+                game = new Game(size,1);
+            }
+            else {
+                int d;
+                do {
+                    System.out.println("Type in the number of dragons (odd number, >= 1 and < " + n / 2 + ": ");
+                    d = Input.getNumber();
+                } while (!(d > 0 && d < size / 2));
+                do {
+                    System.out.println("Type in 0 for Immobile dragon, 1 for random movement or 2 for dragon movement and sleep mechanism: ");
+                    dm = Input.getNumber();
+                } while (!(dm >= 0 && dm < 3));
+                game = new Game(size,d);
+            }
         }
         //new Maze(10001);
 
-        game.play();
+        game.play(dm);
     }
 }
