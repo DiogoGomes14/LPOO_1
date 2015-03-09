@@ -1,8 +1,8 @@
 package maze.logic;
 
-import maze.cli.Output;
+import maze.cli.Interface;
+import maze.logic.weapons.Sword;
 
-import java.net.DatagramPacket;
 import java.util.Random;
 
 
@@ -65,7 +65,12 @@ public class Game {
         mainCycle:
         while (!(player.getRow() == maze.getRow() && player.getColumn() == maze.getColumn() && player.getHero() == 'A' && deadDragons)) {
             // ask for the next player move
-            player.newPosition(maze,deadDragons);
+
+            char ch = player.newPosition(maze,deadDragons);
+            if (ch == ' ')
+                continue;
+            else if (ch != 'm')
+                shoot(ch);
 
             // if the player is in the same position as the sword change the 'H' to 'A'
             if (player.getRow() == sword.getRow() && player.getColumn() == sword.getColumn())
@@ -117,7 +122,7 @@ public class Game {
         // insert the hero on the map
         maze.setMaze(player.getRow(), player.getColumn(), player.getHero());
 
-        Output.printMap(maze.getMaze(), maze.getSize());
+        Interface.printMap(maze.getMaze(), maze.getSize());
 
         // reset the board
         int numberOfAliveDragons = 0;
@@ -150,5 +155,41 @@ public class Game {
                 dragon.setAlive(false);
         }
         return true;
+    }
+
+    public void shoot(char direction) {
+        int wallRow = 0;
+        int wallColumn = 0;
+        int dragonIndex = -1;
+        switch (direction) {
+            case 'l':
+                for (int i = 1; i <= maze.getSize(); i++){
+                    if(maze.getMaze(player.getRow(), player.getColumn() - i) == 'X'){
+                        wallColumn = player.getColumn() - i;
+                        break;
+                    }
+                }
+                for (int i = 0; i < dragon.length; i++){
+                    if(dragon[i].getRow() == player.getRow() && dragon[i].getColumn() > wallColumn && dragon[i].getColumn() < player.getColumn()){
+                        if (dragonIndex == -1)
+                            dragonIndex = i;
+                        else if(dragon[i].getColumn() > dragon[dragonIndex].getColumn())
+                            dragonIndex = i;
+                    }
+                }
+                break;
+            case 'r':
+
+
+                break;
+            case 'u':
+
+                break;
+            case 'd':
+
+                break;
+            default:
+                break;
+        }
     }
 }

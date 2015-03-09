@@ -1,4 +1,6 @@
-package maze.logic;
+package maze.logic.weapons;
+
+import maze.logic.Maze;
 
 public class Sword extends Maze {
     public Sword(){
