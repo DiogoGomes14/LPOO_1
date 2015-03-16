@@ -1,7 +1,5 @@
 package maze.logic;
 
-import maze.cli.Output;
-
 import java.util.Random;
 import java.util.Stack;
 
@@ -134,30 +132,7 @@ public class Maze {
                     }
                     break;
             }
-            /*
-            int i = 0;
-            for (int s : stack){
-                i++;
-                System.out.print(s + " ");
-                if(i%2 == 0){
-                    System.out.print("| ");
-                }
-            }
-            System.out.print('\n');
-
-            System.out.print(column + "-" + row + " | " + r + ":\n");
-            Output.printMap(visitedCells,visitedCellsSize);
-            System.out.print('\n');
-            */
-
         }
-        /*
-        Output.printMap(maze,size);
-
-        System.out.print("\n");
-
-        Output.printMap(visitedCells, visitedCellsSize);
-        */
     }
 
     public int getRow(){

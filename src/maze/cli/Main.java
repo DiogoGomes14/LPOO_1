@@ -1,7 +1,6 @@
-package maze;
+package maze.cli;
 
 import maze.logic.Game;
-import maze.cli.Interface;
 
 public class Main {
     public static void main(String[] args) {
@@ -41,7 +40,6 @@ public class Main {
                 game = new Game(size,d);
             }
         }
-        //new Maze(10001);
 
         game.play(dm);
     }
