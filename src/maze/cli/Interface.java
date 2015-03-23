@@ -1,5 +1,7 @@
 package maze.cli;
 
+import maze.logic.Player;
+
 import java.util.Scanner;
 
 public class Interface {
@@ -19,6 +21,27 @@ public class Interface {
         }
     }
 
+    public static void printInventory(Player player){
+        int shield = player.getInventory(0);
+        int darts = player.getInventory(1);
+
+        System.out.print("Inventory: ");
+        if(shield == 0 && darts == 0){
+            System.out.print("Nothing;");
+        }
+        else {
+            if(player.getHero() == 'A')
+                System.out.print("Sword; ");
+
+            if(shield == 1)
+                System.out.print("Shield; ");
+
+            if(darts != 0)
+                System.out.print(darts + " Darts;");
+        }
+        System.out.println();
+    }
+
     public static int getNumber(){
         int number = 0;
         Scanner s = new Scanner(System.in);
@@ -33,6 +56,21 @@ public class Interface {
         return number;
     }
 
+    public static int getStart(){
+        int number = 0;
+        Scanner s = new Scanner(System.in);
+        try {
+            number = s.nextInt();
+            //System.out.println(ch);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        //s.close();
+        return number;
+    }
+
+
     public static String getPlayerMove(){
         String s1 = "";
 
@@ -40,7 +78,7 @@ public class Interface {
 
         Scanner s = new Scanner(System.in);
         try {
-            s1 = s.findInLine("^(l|r|u|d|(s l|r|u|d))");
+            s1 = s.findInLine("^(l|r|u|d|(s (l|r|u|d)))");
             //System.out.println(ch);
         }
         catch(Exception e){

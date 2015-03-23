@@ -5,10 +5,8 @@ import maze.logic.weapons.*;
 
 import java.util.Random;
 
-// TODO add dragon ranged attack if less than 3 blocks away
-
 public class Game {
-    private Dragon[] dragon;
+    private Dragon[] dragons;
     private Sword sword = new Sword();
     private Darts darts[];
     private Shield shield = new Shield();
@@ -19,10 +17,10 @@ public class Game {
 
     public Game() {
         maze = new Maze();
-        dragon = new Dragon[1];
-        dragon[0] = new Dragon();
-        dragon[0].setRow(3);
-        dragon[0].setColumn(1);
+        dragons = new Dragon[1];
+        dragons[0] = new Dragon();
+        dragons[0].setRow(3);
+        dragons[0].setColumn(1);
         sword.setRow(8);
         sword.setColumn(1);
         player.setRow(1);
@@ -32,7 +30,7 @@ public class Game {
 
     public Game(int mazeSize, int numDragons){
         maze = new Maze(mazeSize);
-        dragon = new Dragon[numDragons];
+        dragons = new Dragon[numDragons];
         int randRow, randCol;
         Random rand = new Random();
 
@@ -68,13 +66,13 @@ public class Game {
 
         // set initial dragons positions
         for(int i = 0; i < numDragons; i++){
-            dragon[i] = new Dragon();
-            while (dragon[i].getColumn() == 0 && dragon[i].getRow() == 0) {
+            dragons[i] = new Dragon();
+            while (dragons[i].getColumn() == 0 && dragons[i].getRow() == 0) {
                 randRow = rand.nextInt(mazeSize);
                 randCol = rand.nextInt(mazeSize);
                 if(maze.getMaze(randRow,randCol) == ' ' && randRow != player.getRow() && randCol != player.getColumn() && randRow != sword.getRow() && randCol != sword.getColumn() && randRow != shield.getRow() && randCol != shield.getColumn()){
-                    dragon[i].setRow(randRow);
-                    dragon[i].setColumn(randCol);
+                    dragons[i].setRow(randRow);
+                    dragons[i].setColumn(randCol);
                 }
             }
         }
@@ -119,24 +117,25 @@ public class Game {
             return true;
         else if (ch != 'm' && darts.length != 0){ // if move is shoot do:
             int dragonIndex = shoot(ch);
+            // one less dart on inventory
+            player.setInventory(1,player.getInventory(1) - 1);
+
             if (dragonIndex != -1){
-
-                // one less dart on inventory
-                player.setInventory(1,player.getInventory(1) - 1);
-
-                // kill dragon
-                dragon[dragonIndex].setAlive(false);
+                // kill dragons
+                dragons[dragonIndex].setAlive(false);
             }
 
         }
 
-        if (player.getRow() == shield.getRow() && player.getColumn() == shield.getColumn()){
+        if (player.getRow() == shield.getRow() && player.getColumn() == shield.getColumn() && shield.isVisible()){
             player.setInventory(0,1);
+            shield.setVisible(false);
         }
 
         for (Darts dart : darts){
-            if(player.getRow() == dart.getRow() && player.getColumn() == dart.getColumn()){
+            if(player.getRow() == dart.getRow() && player.getColumn() == dart.getColumn() && dart.isVisible()){
                 player.setInventory(1, player.getInventory(1) + 1);
+                dart.setVisible(false);
             }
         }
 
@@ -144,15 +143,23 @@ public class Game {
         if (player.getRow() == sword.getRow() && player.getColumn() == sword.getColumn())
             player.setHero('A');
 
+        if(dragonAttack()){
+            return false;
+        }
 
-        for(Dragon d : dragon){
+        for(Dragon d : dragons){
             if(typeOfDragonMovement != 0) {
                 if (typeOfDragonMovement == 2)
                     time = d.sleepCalculation(time);
 
                 // if the Dragon is alive calculate next Dragon position
-                if (d.getAlive() && d.getDragon() == 'D')
-                    d.dragonMovement(maze);
+                if (d.getAlive() && d.getDragon() == 'D'){
+                    Random rand = new Random();
+                    int randomNum = rand.nextInt(4);
+
+                    d.dragonMovement(maze, randomNum);
+                }
+
             }
             if (!playerDragonInteraction(d)) {
                 return false; // endgame
@@ -161,7 +168,7 @@ public class Game {
 
 
         /*
-        System.out.println("dragon: " + dragon.getAlive() + " " + dragon.getRow() + "-" + dragon.getColumn());
+        System.out.println("dragons: " + dragons.getAlive() + " " + dragons.getRow() + "-" + dragons.getColumn());
         System.out.println("player: " + player.getHero() + " " + player.getRow() + "-" + player.getColumn());
         System.out.println("exit: " + maze.getRow() + "-" + maze.getColumn());
         System.out.println("sword: " + sword.getRow() + "-" + sword.getColumn());
@@ -170,13 +177,20 @@ public class Game {
     }
 
     public void calculateBoard() {
-        //TODO print darts and shield
 
         // insert the sword on the map
         if (player.getHero() != 'A')
             maze.setMaze(sword.getRow(),sword.getColumn(), 'E');
 
-        for(Dragon d : dragon){
+        for (Darts weapon : darts){
+            if (weapon.isVisible())
+                maze.setMaze(weapon.getRow(), weapon.getColumn(), 'W');
+        }
+
+        if(shield.isVisible())
+            maze.setMaze(shield.getRow(), shield.getColumn(), 's');
+
+        for(Dragon d : dragons){
             // insert the Dragon on the map
             if (d.getAlive())
                 maze.setMaze(d.getRow(),d.getColumn(), d.getDragon());
@@ -186,21 +200,29 @@ public class Game {
                 maze.setMaze(d.getRow(),d.getColumn(), 'F');
 
         }
-
+        
         // insert the hero on the map
         maze.setMaze(player.getRow(), player.getColumn(), player.getHero());
 
+        Interface.printInventory(player);
         Interface.printMap(maze.getMaze(), maze.getSize());
 
         // reset the board
         int numberOfAliveDragons = 0;
-        for(Dragon d : dragon){
+        for(Dragon d : dragons){
             maze.setMaze(d.getRow(), d.getColumn(), ' ');
             if(d.getAlive())
                 numberOfAliveDragons++;
         }
         if(numberOfAliveDragons == 0)
             deadDragons = true;
+
+        for (Darts weapon : darts){
+            maze.setMaze(weapon.getRow(), weapon.getColumn(), ' ');
+        }
+
+        if(shield.isVisible())
+            maze.setMaze(shield.getRow(), shield.getColumn(), ' ');
 
         maze.setMaze(sword.getRow(), sword.getColumn(), ' ');
         maze.setMaze(player.getRow(), player.getColumn(), ' ');
@@ -217,7 +239,7 @@ public class Game {
                 return false;
             }
 
-            // if the has a sword next to the Dragon, kill it (dragon.alive = false)
+            // if the has a sword next to the Dragon, kill it (dragons.alive = false)
             else
                 dragon.setAlive(false);
         }
@@ -238,11 +260,11 @@ public class Game {
                         break;
                     }
                 }
-                for (int i = 0; i < dragon.length; i++){
-                    if(dragon[i].getRow() == wallRow && dragon[i].getColumn() > wallColumn && dragon[i].getColumn() < player.getColumn()){
+                for (int i = 0; i < dragons.length; i++){
+                    if(dragons[i].getRow() == wallRow && dragons[i].getColumn() > wallColumn && dragons[i].getColumn() < player.getColumn()){
                         if (dragonIndex == -1)
                             dragonIndex = i;
-                        else if(dragon[i].getColumn() > dragon[dragonIndex].getColumn())
+                        else if(dragons[i].getColumn() > dragons[dragonIndex].getColumn())
                             dragonIndex = i;
                     }
                 }
@@ -255,11 +277,11 @@ public class Game {
                         break;
                     }
                 }
-                for (int i = 0; i < dragon.length; i++){
-                    if(dragon[i].getRow() == wallRow && dragon[i].getColumn() < wallColumn && dragon[i].getColumn() > player.getColumn()){
+                for (int i = 0; i < dragons.length; i++){
+                    if(dragons[i].getRow() == wallRow && dragons[i].getColumn() < wallColumn && dragons[i].getColumn() > player.getColumn()){
                         if (dragonIndex == -1)
                             dragonIndex = i;
-                        else if(dragon[i].getColumn() < dragon[dragonIndex].getColumn())
+                        else if(dragons[i].getColumn() < dragons[dragonIndex].getColumn())
                             dragonIndex = i;
                     }
                 }
@@ -272,11 +294,11 @@ public class Game {
                         break;
                     }
                 }
-                for (int i = 0; i < dragon.length; i++){
-                    if(dragon[i].getColumn() == wallColumn && dragon[i].getRow() > wallRow && dragon[i].getRow() < player.getRow()){
+                for (int i = 0; i < dragons.length; i++){
+                    if(dragons[i].getColumn() == wallColumn && dragons[i].getRow() > wallRow && dragons[i].getRow() < player.getRow()){
                         if (dragonIndex == -1)
                             dragonIndex = i;
-                        else if(dragon[i].getRow() > dragon[dragonIndex].getRow())
+                        else if(dragons[i].getRow() > dragons[dragonIndex].getRow())
                             dragonIndex = i;
                     }
                 }
@@ -289,11 +311,11 @@ public class Game {
                         break;
                     }
                 }
-                for (int i = 0; i < dragon.length; i++){
-                    if(dragon[i].getColumn() == wallColumn && dragon[i].getRow() < wallRow && dragon[i].getRow() > player.getRow()){
+                for (int i = 0; i < dragons.length; i++){
+                    if(dragons[i].getColumn() == wallColumn && dragons[i].getRow() < wallRow && dragons[i].getRow() > player.getRow()){
                         if (dragonIndex == -1)
                             dragonIndex = i;
-                        else if(dragon[i].getRow() < dragon[dragonIndex].getRow())
+                        else if(dragons[i].getRow() < dragons[dragonIndex].getRow())
                             dragonIndex = i;
                     }
                 }
@@ -304,12 +326,60 @@ public class Game {
         return dragonIndex;
     }
 
+    public boolean dragonAttack(){
+        if(player.getInventory(0) == 1)
+            return false;
+
+        for (int j = 1; j <= 3; j++){
+            if (maze.getMaze(player.getRow() + j, player.getColumn()) == 'X')
+                break;
+            if (dragonAt(player.getRow() + j, player.getColumn())){
+                return true;
+            }
+        }
+
+        for (int j = 1; j <= 3; j++){
+            if (maze.getMaze(player.getRow() - j, player.getColumn()) == 'X')
+                break;
+            if (dragonAt(player.getRow() - j, player.getColumn())){
+                return true;
+            }
+        }
+
+        for (int j = 1; j <= 3; j++){
+            if (maze.getMaze(player.getRow(), player.getColumn() + j) == 'X')
+                break;
+            if (dragonAt(player.getRow(), player.getColumn() + j)){
+                return true;
+            }
+        }
+
+        for (int j = 1; j <= 3; j++){
+            if (maze.getMaze(player.getRow(), player.getColumn() - j) == 'X')
+                break;
+            if (dragonAt(player.getRow(), player.getColumn() - j)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean dragonAt(int row, int column){
+        for (Dragon d : dragons){
+            if(d.getRow() == row && d.getColumn() == column && d.getAlive()){
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Maze getMaze() {
         return maze;
     }
 
-    public Dragon[] getDragon() {
-        return dragon;
+    public Dragon[] getDragons() {
+        return dragons;
     }
 
     public Sword getSword() {
@@ -338,5 +408,23 @@ public class Game {
 
     public void setDeadDragons(boolean deadDragons) {
         this.deadDragons = deadDragons;
+    }
+
+    public void setShield(int row, int column) {
+        this.shield.setRow(row);
+        this.shield.setColumn(column);
+    }
+
+    public void setDarts(Darts[] darts) {
+        this.darts = darts;
+    }
+
+    public boolean setDarts(int index, int row, int column) {
+        if (index >= 0 && index < darts.length){
+            this.darts[index].setRow(row);
+            this.darts[index].setColumn(column);
+            return true;
+        }
+        return false;
     }
 }

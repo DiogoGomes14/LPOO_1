@@ -12,13 +12,9 @@ public class Dragon extends Maze {
         this.row = 0;
     }
 
-    public void dragonMovement(Maze maze){
-        // generate a random number and if equivalent move made it go to the wall don't move it
+    public void dragonMovement(Maze maze, int num){
 
-        Random rand = new Random();
-        int randomNum = rand.nextInt(4);
-
-        switch (randomNum){
+        switch (num){
             case 0: // Move left
                 if(maze.getMaze(row, column - 1) == ' ')
                     column--;
@@ -48,11 +44,11 @@ public class Dragon extends Maze {
             time = 0;
             this.dragon = 'D';
         }
-
-        if (dragon == 'D' && rand.nextInt(5) == 0){
+        if(dragon == 'D' && rand.nextInt(5) == 0){
             dragon = 'd';
             timeSleep = rand.nextInt(3) + 2;
         }
+
         return time;
     }
 

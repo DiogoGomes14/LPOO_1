@@ -6,12 +6,24 @@ public class Main {
     public static void main(String[] args) {
 
         System.out.println("Welcome.");
-        System.out.println("Type 0 for a predefined maze, 1 to play in a random maze with one dragon or anything else for a random maze with a certain number of dragons: ");
+
+        /*
+        System.out.println("Type the following separated by spaces:");
+        System.out.println("Maze size (0 for predefined or an odd number bigger than 8 for a random one)");
+        System.out.println("Number of dragons");
+        System.out.println("Type of dragons (0 for Immobile dragon, 1 for random movement or 2 for dragon movement and sleep mechanism)");
+        */
+
+        System.out.println("Type 0 for the predefined map, 1 for a game with only one dragon and anything else for a more advanced type of game");
         int dm = 0;
         int n = Interface.getNumber();
         Game game;
         if(n == 0){
             game = new Game();
+        }
+        else if(n == 11){
+            game = new Game(11,2);
+            dm = 2;
         }
         else{
             int size;
