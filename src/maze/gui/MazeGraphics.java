@@ -45,19 +45,6 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
         }
     }
 
-    public static void main(String[] args) {
-        JFrame f = new JFrame("Maze");
-        Game game = new Game(9,2);
-        JPanel panel = new MazeGraphics(game);
-        //JButton button = new JButton();
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.setPreferredSize(new Dimension(1280, 800));
-        f.getContentPane().add(panel);
-        f.pack();
-        f.setVisible(true);
-        panel.requestFocus();
-    }
-
     public void paintComponent(Graphics g) {
         //TODO recheck this entire method
         super.paintComponent(g); // clear background ...

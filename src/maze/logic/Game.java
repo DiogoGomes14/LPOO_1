@@ -325,6 +325,7 @@ public class Game {
     }
 
     public boolean dragonAttack(){
+        // TODO Fix bug in this function.
         if(player.getInventory(0) == 1)
             return false;
 
