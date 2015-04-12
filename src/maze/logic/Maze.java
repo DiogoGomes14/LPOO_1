@@ -135,14 +135,25 @@ public class Maze {
         }
     }
 
+    /**
+     * This is the row of the exit
+     * @return exit row
+     */
     public int getRow(){
         return row;
     }
 
+    /**
+     * This is the column of the exit
+     * @return exit column
+     */
     public int getColumn(){
         return column;
     }
 
+    /**
+     * @return size of the maze
+     */
     public final int getSize(){
         return size;
     }

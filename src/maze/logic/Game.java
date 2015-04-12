@@ -8,7 +8,7 @@ import java.util.Random;
 public class Game {
     private Dragon[] dragons;
     private Sword sword = new Sword();
-    private Darts darts[];
+    private Darts darts[] = new Darts[]{};
     private Shield shield = new Shield();
     private Player player = new Player();
     private Maze maze;
@@ -25,7 +25,8 @@ public class Game {
         sword.setColumn(1);
         player.setRow(1);
         player.setColumn(1);
-        darts = new Darts[0];
+        darts = new Darts[]{};
+        shield.setVisible(false);
     }
 
     public Game(int mazeSize, int numDragons){
@@ -93,7 +94,7 @@ public class Game {
     }
 
     public void play(int typeOfDragonMovement){
-        calculateBoard();
+        printBoard();
 
         while (!(player.getRow() == maze.getRow() && player.getColumn() == maze.getColumn() && player.getHero() == 'A' && deadDragons)) {
             // ask for the next player move
@@ -102,11 +103,11 @@ public class Game {
             char ch = player.newPosition(maze, deadDragons, move);
 
             if( !updateGame(ch, typeOfDragonMovement) ){
-                calculateBoard();
+                printBoard();
                 break;
             }
 
-            calculateBoard();
+            printBoard();
         }
         System.out.println(!deadDragons ? "You died." : "You have reached the exit.");
         System.out.println("The end.");
@@ -140,8 +141,10 @@ public class Game {
         }
 
         // if the player is in the same position as the sword change the 'H' to 'A'
-        if (player.getRow() == sword.getRow() && player.getColumn() == sword.getColumn())
+        if (player.getRow() == sword.getRow() && player.getColumn() == sword.getColumn()){
             player.setHero('A');
+        }
+
 
         if(dragonAttack()){
             return false;
@@ -153,7 +156,7 @@ public class Game {
                     time = d.sleepCalculation(time);
 
                 // if the Dragon is alive calculate next Dragon position
-                if (d.getAlive() && d.getDragon() == 'D'){
+                if (d.isAlive() && d.getDragon() == 'D'){
                     Random rand = new Random();
                     int randomNum = rand.nextInt(4);
 
@@ -168,7 +171,7 @@ public class Game {
 
 
         /*
-        System.out.println("dragons: " + dragons.getAlive() + " " + dragons.getRow() + "-" + dragons.getColumn());
+        System.out.println("dragons: " + dragons.isAlive() + " " + dragons.getRow() + "-" + dragons.getColumn());
         System.out.println("player: " + player.getHero() + " " + player.getRow() + "-" + player.getColumn());
         System.out.println("exit: " + maze.getRow() + "-" + maze.getColumn());
         System.out.println("sword: " + sword.getRow() + "-" + sword.getColumn());
@@ -176,7 +179,7 @@ public class Game {
         return true;
     }
 
-    public void calculateBoard() {
+    public void printBoard() {
 
         // insert the sword on the map
         if (player.getHero() != 'A')
@@ -192,7 +195,7 @@ public class Game {
 
         for(Dragon d : dragons){
             // insert the Dragon on the map
-            if (d.getAlive())
+            if (d.isAlive())
                 maze.setMaze(d.getRow(),d.getColumn(), d.getDragon());
 
             // check if the Dragon is in the same place as the sword and change that location to 'F'
@@ -208,14 +211,9 @@ public class Game {
         Interface.printMap(maze.getMaze(), maze.getSize());
 
         // reset the board
-        int numberOfAliveDragons = 0;
         for(Dragon d : dragons){
             maze.setMaze(d.getRow(), d.getColumn(), ' ');
-            if(d.getAlive())
-                numberOfAliveDragons++;
         }
-        if(numberOfAliveDragons == 0)
-            deadDragons = true;
 
         for (Darts weapon : darts){
             maze.setMaze(weapon.getRow(), weapon.getColumn(), ' ');
@@ -367,7 +365,7 @@ public class Game {
 
     public boolean dragonAt(int row, int column){
         for (Dragon d : dragons){
-            if(d.getRow() == row && d.getColumn() == column && d.getAlive()){
+            if(d.getRow() == row && d.getColumn() == column && d.isAlive()){
                 return true;
             }
         }
@@ -406,8 +404,16 @@ public class Game {
         return deadDragons;
     }
 
-    public void setDeadDragons(boolean deadDragons) {
-        this.deadDragons = deadDragons;
+    public int getNumberDragonsAlive(){
+        int numberOfAliveDragons = 0;
+        for(Dragon d : dragons){
+            if(d.isAlive())
+                numberOfAliveDragons++;
+        }
+        if(numberOfAliveDragons == 0)
+            deadDragons = true;
+
+        return numberOfAliveDragons;
     }
 
     public void setShield(int row, int column) {

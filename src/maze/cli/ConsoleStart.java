@@ -2,7 +2,7 @@ package maze.cli;
 
 import maze.logic.Game;
 
-public class Main {
+public class ConsoleStart {
     public static void main(String[] args) {
 
         System.out.println("Welcome.");
