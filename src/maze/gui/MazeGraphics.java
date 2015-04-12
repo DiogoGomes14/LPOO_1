@@ -47,13 +47,15 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
 
     public static void main(String[] args) {
         JFrame f = new JFrame("Maze");
-        Game game = new Game();
+        Game game = new Game(9,2);
+        JPanel panel = new MazeGraphics(game);
+        //JButton button = new JButton();
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         f.setPreferredSize(new Dimension(1280, 800));
-        f.getContentPane().add(new MazeGraphics(game));
+        f.getContentPane().add(panel);
         f.pack();
         f.setVisible(true);
-        f.requestFocus();
+        panel.requestFocus();
     }
 
     public void paintComponent(Graphics g) {
@@ -83,7 +85,7 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
             }
         }
 
-        g.drawImage(heroSprite, width * this.game.getPlayer().getRow(), height * this.game.getPlayer().getRow(), width, height, null);
+        g.drawImage(heroSprite, width * this.game.getPlayer().getColumn(), height * this.game.getPlayer().getRow(), width, height, null);
 
         if (this.game.getShield().isVisible()){
             g.drawImage(shieldSprite, width * this.game.getShield().getColumn(), height * this.game.getShield().getRow(), width, height, null);
@@ -92,7 +94,7 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
         // check if player has sword and draw it if true (in the top left corner of the player position)
         if (this.game.getPlayer().getHero() == 'A'){
             //TODO verify if in the correct position in the square
-            g.drawImage(swordSprite, width * this.game.getPlayer().getColumn(), height * this.game.getPlayer().getRow(), width/4, height/4, null);
+            g.drawImage(swordSprite, width * this.game.getPlayer().getColumn(), height * this.game.getPlayer().getRow() + (3 * height)/4, width/4, height/4, null);
         }
         else { // draw in it's original position if false
             g.drawImage(swordSprite, width * this.game.getSword().getColumn(), height * this.game.getSword().getRow(), width, height, null);
@@ -101,7 +103,7 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
         // checking if player has shield and draw it if true (in the bottom right corner)
         if (this.game.getPlayer().getInventory(0) == 1){
             //TODO verify if in the correct position in the square
-            g.drawImage(shieldSprite, width * this.game.getShield().getColumn() + (3 * width)/4, height * this.game.getShield().getRow() + (3*height)/4, width/4, height, null);
+            g.drawImage(shieldSprite, width * this.game.getPlayer().getColumn() + (3 * width)/4, height * this.game.getPlayer().getRow() + (3 * height)/4, width/4, height/4, null);
         }
 
         for (Darts dart : this.game.getDarts()){
@@ -121,38 +123,57 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
     //TODO add input
 
     @Override
-    public void keyTyped(KeyEvent e) {
-        switch(e.getKeyCode()){
-            case KeyEvent.VK_LEFT:
-                char ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isDeadDragons(), "l");
-
-                if( !this.game.updateGame(ch, 0/*typeOfDragonMovement*/) ){ // TODO change
-                    //break;
-                    // TODO show game done
-                }
-                repaint();
-                break;
-
-            case KeyEvent.VK_RIGHT:
-                repaint();
-                break;
-
-            case KeyEvent.VK_UP:
-
-                repaint();
-                break;
-
-            case KeyEvent.VK_DOWN:
-
-                repaint();
-                break;
-        }
-
-    }
+    public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyPressed(KeyEvent e) {
-
+        char ch;
+        switch(e.getKeyCode()){
+            case KeyEvent.VK_LEFT:
+                ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isDeadDragons(), "l");
+                System.out.println("Left");
+                if( !this.game.updateGame(ch, 2/*typeOfDragonMovement*/) ){ // TODO change
+                    //break;
+                    // TODO show game done
+                }
+                System.out.println( this.game.getPlayer().getRow() + " - " +  this.game.getPlayer().getColumn());
+                System.out.println( this.game.getDragons()[0].getRow() + " - " +  this.game.getDragons()[0].getColumn());
+                repaint();
+                break;
+            case KeyEvent.VK_RIGHT:
+                ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isDeadDragons(), "r");
+                System.out.println("Right");
+                if( !this.game.updateGame(ch, 2/*typeOfDragonMovement*/) ){ // TODO change
+                    //break;
+                    // TODO show game done
+                }
+                System.out.println( this.game.getPlayer().getRow() + " - " +  this.game.getPlayer().getColumn());
+                System.out.println( this.game.getDragons()[0].getRow() + " - " +  this.game.getDragons()[0].getColumn());
+                repaint();
+                break;
+            case KeyEvent.VK_UP:
+                ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isDeadDragons(), "u");
+                System.out.println("Up");
+                if( !this.game.updateGame(ch, 2/*typeOfDragonMovement*/) ){ // TODO change
+                    //break;
+                    // TODO show game done
+                }
+                System.out.println( this.game.getPlayer().getRow() + " - " +  this.game.getPlayer().getColumn());
+                System.out.println( this.game.getDragons()[0].getRow() + " - " +  this.game.getDragons()[0].getColumn());
+                repaint();
+                break;
+            case KeyEvent.VK_DOWN:
+                ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isDeadDragons(), "d");
+                System.out.println("Down");
+                if( !this.game.updateGame(ch, 2/*typeOfDragonMovement*/) ){ // TODO change
+                    //break;
+                    // TODO show game done
+                }
+                System.out.println( this.game.getPlayer().getRow() + " - " +  this.game.getPlayer().getColumn());
+                System.out.println( this.game.getDragons()[0].getRow() + " - " +  this.game.getDragons()[0].getColumn());
+                repaint();
+                break;
+        }
     }
 
     @Override
