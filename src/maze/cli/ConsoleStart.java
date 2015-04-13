@@ -41,7 +41,7 @@ public class ConsoleStart {
             else {
                 int d;
                 do {
-                    System.out.println("Type in the number of dragons (odd number, >= 1 and < " + size / 2 + ": ");
+                    System.out.println("Type in the number of dragons ( >= 1 and < " + size / 2 + ": ");
                     d = Interface.getNumber();
                 } while (!(d > 0 && d < size / 2));
                 do {

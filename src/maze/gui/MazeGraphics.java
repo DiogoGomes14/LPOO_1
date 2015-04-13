@@ -26,6 +26,7 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
     BufferedImage fireSprite;
     BufferedImage floorSprite;
     String state = "Playing";
+    Font f;
 
     public MazeGraphics(Game game) {
         this.addMouseListener(this);
@@ -33,6 +34,7 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
         this.addKeyListener(this);
         this.game = game;
 
+        f = new Font("Dialog", Font.PLAIN, 66);
         try {
             heroSprite = ImageIO.read(new File("sprites\\hero.png"));
             wallSprite = ImageIO.read(new File("sprites\\wall.png"));
@@ -119,20 +121,22 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
     }
 
     public void paintComponent(Graphics g) {
+
         if(state.equals("Playing")){
             playing(g);
         }
         else if (state.equals("Victory")) {
+            g.setFont(f);
             //g.setColor(Color.WHITE);
             //g.fillRect(0, 0, getWidth(), getHeight());
-            g.setColor(Color.BLACK);
-            g.drawString("You Win!!!",getWidth()/2,getHeight()/2);
+            g.setColor(Color.BLUE);
+            g.drawString("You Win!!!", getWidth() / 4, getHeight() / 2);
         }
         else if (state.equals("End")){
-            g.setColor(Color.BLACK);
-            g.drawString("GAME OVER",getWidth()/2,getHeight()/2);
+            g.setFont(f);
+            g.setColor(Color.RED);
+            g.drawString("GAME OVER", getWidth() / 4, getHeight() / 2);
         }
-
     }
 
     @Override

@@ -151,8 +151,10 @@ public class Game implements Serializable{
             player.setHero('A');
         }
 
-        if(dragonAttack()){
-            return 'D'; //endgame (hero is dead)
+        if(dragonMovement == 2){
+            if(dragonAttack()){
+                return 'D'; //endgame (hero is dead)
+            }
         }
 
         for(Dragon d : dragons){
