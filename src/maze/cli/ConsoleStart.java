@@ -15,15 +15,14 @@ public class ConsoleStart {
         */
 
         System.out.println("Type 0 for the predefined map, 1 for a game with only one dragon and anything else for a more advanced type of game");
-        int dm = 0;
+        int dm;
         int n = Interface.getNumber();
         Game game;
         if(n == 0){
             game = new Game();
         }
-        else if(n == 11){
-            game = new Game(11,2);
-            dm = 2;
+        else if(n == 1414){
+            game = new Game(11,2,2);
         }
         else{
             int size;
@@ -37,7 +36,7 @@ public class ConsoleStart {
                     System.out.println("Type in 0 for Immobile dragon, 1 for random movement or 2 for dragon movement and sleep mechanism: ");
                     dm = Interface.getNumber();
                 } while (!(dm >= 0 && dm < 3));
-                game = new Game(size,1);
+                game = new Game(size,1,dm);
             }
             else {
                 int d;
@@ -49,10 +48,10 @@ public class ConsoleStart {
                     System.out.println("Type in 0 for Immobile dragon, 1 for random movement or 2 for dragon movement and sleep mechanism: ");
                     dm = Interface.getNumber();
                 } while (!(dm >= 0 && dm < 3));
-                game = new Game(size,d);
+                game = new Game(size,d,dm);
             }
         }
 
-        game.play(dm);
+        game.play();
     }
 }

@@ -1,9 +1,10 @@
 package maze.logic;
 
+import java.io.Serializable;
 import java.util.Random;
 import java.util.Stack;
 
-public class Maze {
+public class Maze implements Serializable{
     private final char[][] maze;
     private final int size;
     protected int row; //exit

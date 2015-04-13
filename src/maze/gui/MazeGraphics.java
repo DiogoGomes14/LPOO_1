@@ -4,25 +4,28 @@ import maze.logic.Dragon;
 import maze.logic.Game;
 import maze.logic.weapons.Darts;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.*;
 
 @SuppressWarnings("serial")
 public class MazeGraphics extends JPanel implements MouseListener, MouseMotionListener, KeyListener {
-    Game game;
+    public Game game;
     BufferedImage heroSprite;
     BufferedImage wallSprite;
     BufferedImage dragonSprite;
+    BufferedImage sleepingDragonSprite;
     BufferedImage swordSprite;
     BufferedImage dartSprite;
     BufferedImage shieldSprite;
     BufferedImage exitSprite;
     BufferedImage fireSprite;
+    BufferedImage floorSprite;
+    String state = "Playing";
 
     public MazeGraphics(Game game) {
         this.addMouseListener(this);
@@ -34,19 +37,20 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
             heroSprite = ImageIO.read(new File("sprites\\hero.png"));
             wallSprite = ImageIO.read(new File("sprites\\wall.png"));
             dragonSprite = ImageIO.read(new File("sprites\\dragon.png"));
+            sleepingDragonSprite = ImageIO.read(new File("sprites\\sleeping.png"));
             swordSprite = ImageIO.read(new File("sprites\\sword.png"));
             dartSprite = ImageIO.read(new File("sprites\\dart.png"));
             shieldSprite = ImageIO.read(new File("sprites\\shield.png"));
             exitSprite = ImageIO.read(new File("sprites\\exit.png"));
             fireSprite = ImageIO.read(new File("sprites\\fire.png"));
+            floorSprite = ImageIO.read(new File("sprites\\floor.png"));
         } catch (IOException e) {
             System.err.println("Failed to read sprites");
             //e.printStackTrace();
         }
     }
 
-    public void paintComponent(Graphics g) {
-        //TODO recheck this entire method
+    private void playing(Graphics g){
         super.paintComponent(g); // clear background ...
 
         int size = this.game.getMaze().getSize();
@@ -54,20 +58,20 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
         int height = getHeight()/size;
 
         // color of the lines
-        g.setColor(Color.BLACK);
+        //g.setColor(Color.BLACK);
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (this.game.getMaze().getMaze(i, j) == 'X') {
                     g.drawImage(wallSprite, width * j, height * i, width, height, null);
-                    g.drawRect(width * j, height * i, width * (j + 1), height * (i + 1));
+                    //g.drawRect(width * j, height * i, width * (j + 1), height * (i + 1));
                 }
                 else if(this.game.getMaze().getMaze(i, j) == 'S'){
-                    g.drawImage(wallSprite, width * j, height * i, width, height, null);
+                    g.drawImage(floorSprite, width * j, height * i, width, height, null);
                     g.drawImage(exitSprite, width * j, height * i, width, height, null);
-                    g.drawRect(width * j, height * i, width * (j + 1), height * (i + 1));
+                    //g.drawRect(width * j, height * i, width * (j + 1), height * (i + 1));
                 }
                 else {
-                    g.drawRect(width * j, height * i, width * (j + 1), height * (i + 1));
+                    g.drawImage(floorSprite, width * j, height * i, width, height, null);
                 }
             }
         }
@@ -100,67 +104,160 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
         }
         for (Dragon dragon : this.game.getDragons()){
             if (dragon.isAlive()){
-                g.drawImage(dragonSprite, width * dragon.getColumn(), height * dragon.getRow(), width, height, null);
+                g.drawImage(!dragon.isAsleep() ? dragonSprite : sleepingDragonSprite, width * dragon.getColumn(), height * dragon.getRow(), width, height, null);
             }
         }
-        //g.fillRect(0,0,getWidth(),getHeight()/2);
-        //g.drawString();
+
+        g.setColor(Color.BLACK);
+        g.drawString("Darts: " + this.game.getPlayer().getInventory(1), 10, 20);
+        g.drawString((this.game.getPlayer().getInventory(0) == 1 ? "Shield" : ""), 10, 40);
+        g.drawString((this.game.getPlayer().getHero() == 'A' ? "Sword" : ""), 10, 60);
     }
 
-    //TODO add input
+    public void setGame(Game game){
+        this.game = game;
+    }
+
+    public void paintComponent(Graphics g) {
+        if(state.equals("Playing")){
+            playing(g);
+        }
+        else if (state.equals("Victory")) {
+            //g.setColor(Color.WHITE);
+            //g.fillRect(0, 0, getWidth(), getHeight());
+            g.setColor(Color.BLACK);
+            g.drawString("You Win!!!",getWidth()/2,getHeight()/2);
+        }
+        else if (state.equals("End")){
+            g.setColor(Color.BLACK);
+            g.drawString("GAME OVER",getWidth()/2,getHeight()/2);
+        }
+
+    }
 
     @Override
     public void keyTyped(KeyEvent e) {}
 
     @Override
     public void keyPressed(KeyEvent e) {
-        char ch;
-        switch(e.getKeyCode()){
-            case KeyEvent.VK_LEFT:
-                ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isDeadDragons(), "l");
-                System.out.println("Left");
-                if( !this.game.updateGame(ch, 2/*typeOfDragonMovement*/) ){ // TODO change
-                    //break;
-                    // TODO show game done
-                }
-                System.out.println( this.game.getPlayer().getRow() + " - " +  this.game.getPlayer().getColumn());
-                System.out.println( this.game.getDragons()[0].getRow() + " - " +  this.game.getDragons()[0].getColumn());
-                repaint();
-                break;
-            case KeyEvent.VK_RIGHT:
-                ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isDeadDragons(), "r");
-                System.out.println("Right");
-                if( !this.game.updateGame(ch, 2/*typeOfDragonMovement*/) ){ // TODO change
-                    //break;
-                    // TODO show game done
-                }
-                System.out.println( this.game.getPlayer().getRow() + " - " +  this.game.getPlayer().getColumn());
-                System.out.println( this.game.getDragons()[0].getRow() + " - " +  this.game.getDragons()[0].getColumn());
-                repaint();
-                break;
-            case KeyEvent.VK_UP:
-                ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isDeadDragons(), "u");
-                System.out.println("Up");
-                if( !this.game.updateGame(ch, 2/*typeOfDragonMovement*/) ){ // TODO change
-                    //break;
-                    // TODO show game done
-                }
-                System.out.println( this.game.getPlayer().getRow() + " - " +  this.game.getPlayer().getColumn());
-                System.out.println( this.game.getDragons()[0].getRow() + " - " +  this.game.getDragons()[0].getColumn());
-                repaint();
-                break;
-            case KeyEvent.VK_DOWN:
-                ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isDeadDragons(), "d");
-                System.out.println("Down");
-                if( !this.game.updateGame(ch, 2/*typeOfDragonMovement*/) ){ // TODO change
-                    //break;
-                    // TODO show game done
-                }
-                System.out.println( this.game.getPlayer().getRow() + " - " +  this.game.getPlayer().getColumn());
-                System.out.println( this.game.getDragons()[0].getRow() + " - " +  this.game.getDragons()[0].getColumn());
-                repaint();
-                break;
+        if(state.equals("Playing")){
+            char ch;
+            char updateState;
+            switch(e.getKeyCode()){
+                case KeyEvent.VK_LEFT:
+                    ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isAllDragonsDead(), "l");
+                    System.out.println("Left");
+                    updateState = this.game.updateGame(ch);
+                    if(updateState == 'W') {
+                        System.out.println("Victory");
+                        state = "Victory";
+                    }
+                    else if (updateState == 'D') {
+                        System.out.println("Game Over");
+                        state = "End";
+                    }
+
+                    /*
+                    System.out.print( this.game.getPlayer().getRow() + " - " +  this.game.getPlayer().getColumn() + ";\t");
+                    for (Dragon d : this.game.getDragons()){
+                        System.out.print(d.getRow() + " - " + d.getColumn() + ";");
+                    }
+                    System.out.println();*/
+                    repaint();
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isAllDragonsDead(), "r");
+                    System.out.println("Right");
+                    updateState = this.game.updateGame(ch);
+                    if(updateState == 'W') {
+                        System.out.println("Victory");
+                        state = "Victory";
+                    }
+                    else if (updateState == 'D') {
+                        System.out.println("Game Over");
+                        state = "End";
+                    }
+                    repaint();
+                    break;
+                case KeyEvent.VK_UP:
+                    ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isAllDragonsDead(), "u");
+                    System.out.println("Up");
+                    updateState = this.game.updateGame(ch);
+                    if(updateState == 'W') {
+                        System.out.println("Victory");
+                        state = "Victory";
+                    }
+                    else if (updateState == 'D') {
+                        System.out.println("Game Over");
+                        state = "End";
+                    }
+                    repaint();
+                    break;
+                case KeyEvent.VK_DOWN:
+                    ch = this.game.getPlayer().newPosition(this.game.getMaze(), this.game.isAllDragonsDead(), "d");
+                    System.out.println("Down");
+                    updateState = this.game.updateGame(ch);
+                    if(updateState == 'W') {
+                        System.out.println("Victory");
+                        state = "Victory";
+                    }
+                    else if (updateState == 'D') {
+                        System.out.println("Game Over");
+                        state = "End";
+                    }
+                    repaint();
+                    break;
+                case KeyEvent.VK_D:
+                    System.out.println("Shot right");
+                    updateState = this.game.updateGame('r');
+                    if(updateState == 'W') {
+                        System.out.println("Victory");
+                        state = "Victory";
+                    }
+                    else if (updateState == 'D') {
+                        System.out.println("Game Over");
+                        state = "End";
+                    }
+                    break;
+                case KeyEvent.VK_A:
+                    System.out.println("Shot left");
+                    updateState = this.game.updateGame('l');
+                    if(updateState == 'W') {
+                        System.out.println("Victory");
+                        state = "Victory";
+                    }
+                    else if (updateState == 'D') {
+                        System.out.println("Game Over");
+                        state = "End";
+                    }
+                    break;
+                case KeyEvent.VK_W:
+                    System.out.println("Shot up");
+                    updateState = this.game.updateGame('u');
+                    if(updateState == 'W') {
+                        System.out.println("Victory");
+                        state = "Victory";
+                    }
+                    else if (updateState == 'D') {
+                        System.out.println("Game Over");
+                        state = "End";
+                    }
+                    break;
+                case KeyEvent.VK_S:
+                    System.out.println("Shot down");
+                    updateState = this.game.updateGame('d');
+                    if(updateState == 'W') {
+                        System.out.println("Victory");
+                        state = "Victory";
+                    }
+                    else if (updateState == 'D') {
+                        System.out.println("Game Over");
+                        state = "End";
+                    }
+                    break;
+            }
         }
+        repaint();
     }
 
     @Override
@@ -168,11 +265,17 @@ public class MazeGraphics extends JPanel implements MouseListener, MouseMotionLi
 
     }
 
-    public void mousePressed(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {
+        this.grabFocus();
+    }
     public void mouseDragged(MouseEvent e) {}
     public void mouseReleased(MouseEvent e) {}
-    public void mouseMoved(MouseEvent arg0) {}
+    public void mouseMoved(MouseEvent arg0) {this.grabFocus();}
     public void mouseClicked(MouseEvent e) {}
     public void mouseEntered(MouseEvent e) {}
     public void mouseExited(MouseEvent e) {}
+
+    public void setState(String state) {
+        this.state = state;
+    }
 }

@@ -1,11 +1,14 @@
 package maze.logic;
 
 import maze.cli.Interface;
-import maze.logic.weapons.*;
+import maze.logic.weapons.Darts;
+import maze.logic.weapons.Shield;
+import maze.logic.weapons.Sword;
 
+import java.io.*;
 import java.util.Random;
 
-public class Game {
+public class Game implements Serializable{
     private Dragon[] dragons;
     private Sword sword = new Sword();
     private Darts darts[] = new Darts[]{};
@@ -14,6 +17,7 @@ public class Game {
     private Maze maze;
     private int time = 0;
     private boolean deadDragons = false;
+    private int dragonMovement = 0;
 
     public Game() {
         maze = new Maze();
@@ -29,11 +33,13 @@ public class Game {
         shield.setVisible(false);
     }
 
-    public Game(int mazeSize, int numDragons){
+    public Game(int mazeSize, int numDragons, int dragonMovement){
         maze = new Maze(mazeSize);
         dragons = new Dragon[numDragons];
+        this.dragonMovement = dragonMovement;
         int randRow, randCol;
         Random rand = new Random();
+
 
         // set initial player position
         while (player.getColumn() == 0 && player.getRow() == 0) {
@@ -93,30 +99,30 @@ public class Game {
         }
     }
 
-    public void play(int typeOfDragonMovement){
+    public void play(){
+        char state = ' ';
+
         printBoard();
 
-        while (!(player.getRow() == maze.getRow() && player.getColumn() == maze.getColumn() && player.getHero() == 'A' && deadDragons)) {
+
+        while (state != 'D' && state != 'W') {
+
             // ask for the next player move
-
             String move = Interface.getPlayerMove();
-            char ch = player.newPosition(maze, deadDragons, move);
 
-            if( !updateGame(ch, typeOfDragonMovement) ){
-                printBoard();
-                break;
-            }
+            char ch = player.newPosition(maze, deadDragons, move);
+            state = updateGame(ch);
 
             printBoard();
         }
-        System.out.println(!deadDragons ? "You died." : "You have reached the exit.");
+        System.out.println(state == 'D' ? "You died." : "You have reached the exit.");
         System.out.println("The end.");
     }
 
-    public boolean updateGame(char ch, int typeOfDragonMovement){
-        if (ch == ' ')
-            return true;
-        else if (ch != 'm' && darts.length != 0){ // if move is shoot do:
+    public char updateGame(char ch){
+        if (ch != 'm' && ch != 'l' && ch != 'r' && ch != 'u' && ch != 'd')
+            return 'F';
+        else if (ch != 'm' && player.getInventory(1) != 0){ // Dart throw
             int dragonIndex = shoot(ch);
             // one less dart on inventory
             player.setInventory(1,player.getInventory(1) - 1);
@@ -145,14 +151,13 @@ public class Game {
             player.setHero('A');
         }
 
-
         if(dragonAttack()){
-            return false;
+            return 'D'; //endgame (hero is dead)
         }
 
         for(Dragon d : dragons){
-            if(typeOfDragonMovement != 0) {
-                if (typeOfDragonMovement == 2)
+            if(dragonMovement != 0) {
+                if (dragonMovement == 2)
                     time = d.sleepCalculation(time);
 
                 // if the Dragon is alive calculate next Dragon position
@@ -160,77 +165,31 @@ public class Game {
                     Random rand = new Random();
                     int randomNum = rand.nextInt(4);
 
-                    d.dragonMovement(maze, randomNum);
+                    dragonMovement(d,randomNum);
                 }
 
             }
-            if (!playerDragonInteraction(d)) {
-                return false; // endgame
+            if(d.isAlive()){
+                if (!playerDragonInteraction(d)) {
+                    return 'D'; // endgame (hero is dead)
+                }
             }
         }
 
+        updateDragonsAlive();
 
-        /*
-        System.out.println("dragons: " + dragons.isAlive() + " " + dragons.getRow() + "-" + dragons.getColumn());
-        System.out.println("player: " + player.getHero() + " " + player.getRow() + "-" + player.getColumn());
-        System.out.println("exit: " + maze.getRow() + "-" + maze.getColumn());
-        System.out.println("sword: " + sword.getRow() + "-" + sword.getColumn());
-        */
-        return true;
-    }
-
-    public void printBoard() {
-
-        // insert the sword on the map
-        if (player.getHero() != 'A')
-            maze.setMaze(sword.getRow(),sword.getColumn(), 'E');
-
-        for (Darts weapon : darts){
-            if (weapon.isVisible())
-                maze.setMaze(weapon.getRow(), weapon.getColumn(), 'W');
-        }
-
-        if(shield.isVisible())
-            maze.setMaze(shield.getRow(), shield.getColumn(), 's');
-
-        for(Dragon d : dragons){
-            // insert the Dragon on the map
-            if (d.isAlive())
-                maze.setMaze(d.getRow(),d.getColumn(), d.getDragon());
-
-            // check if the Dragon is in the same place as the sword and change that location to 'F'
-            if (d.getRow() == sword.getRow() && d.getColumn() == sword.getColumn())
-                maze.setMaze(d.getRow(),d.getColumn(), 'F');
-
-        }
-        
-        // insert the hero on the map
-        maze.setMaze(player.getRow(), player.getColumn(), player.getHero());
-
-        Interface.printInventory(player);
-        Interface.printMap(maze.getMaze(), maze.getSize());
-
-        // reset the board
-        for(Dragon d : dragons){
-            maze.setMaze(d.getRow(), d.getColumn(), ' ');
-        }
-
-        for (Darts weapon : darts){
-            maze.setMaze(weapon.getRow(), weapon.getColumn(), ' ');
-        }
-
-        if(shield.isVisible())
-            maze.setMaze(shield.getRow(), shield.getColumn(), ' ');
-
-        maze.setMaze(sword.getRow(), sword.getColumn(), ' ');
-        maze.setMaze(player.getRow(), player.getColumn(), ' ');
+        if (player.getRow() == maze.getRow() && player.getColumn() == maze.getColumn() && player.getHero() == 'A' && deadDragons)
+                return 'W';
+        return 'C';
     }
 
     public boolean playerDragonInteraction(Dragon dragon){
         if ((player.getRow() == dragon.getRow() + 1 && player.getColumn() == dragon.getColumn())
                 || (player.getRow() == dragon.getRow() - 1 && player.getColumn() == dragon.getColumn())
                 || (player.getRow() == dragon.getRow() && player.getColumn() == dragon.getColumn() + 1)
-                || (player.getRow() == dragon.getRow() && player.getColumn() == dragon.getColumn() - 1))
+                || (player.getRow() == dragon.getRow() && player.getColumn() == dragon.getColumn() - 1)
+                || (player.getRow() == dragon.getRow() && player.getColumn() == dragon.getColumn())
+                )
         {
             // if the hero doesn't have a sword when next to the Dragon print the map and end the game (die)
             if(player.getHero() != 'A'){
@@ -325,38 +284,37 @@ public class Game {
     }
 
     public boolean dragonAttack(){
-        // TODO Fix bug in this function.
         if(player.getInventory(0) == 1)
             return false;
 
-        for (int j = 1; j <= 3; j++){
-            if (maze.getMaze(player.getRow() + j, player.getColumn()) == 'X')
+        for (int j = player.getRow() + 1; j <= player.getRow() + 3 && j < maze.getSize(); j++){
+            if (maze.getMaze(j, player.getColumn()) == 'X')
                 break;
-            if (dragonAt(player.getRow() + j, player.getColumn())){
+            if (dragonAt(j, player.getColumn(), true)){
                 return true;
             }
         }
 
-        for (int j = 1; j <= 3; j++){
-            if (maze.getMaze(player.getRow() - j, player.getColumn()) == 'X')
+        for (int j = player.getRow() - 1; j >= player.getRow() - 3 && j > 0; j--){
+            if (maze.getMaze(j, player.getColumn()) == 'X')
                 break;
-            if (dragonAt(player.getRow() - j, player.getColumn())){
+            if (dragonAt(j, player.getColumn(), true)){
                 return true;
             }
         }
 
-        for (int j = 1; j <= 3; j++){
-            if (maze.getMaze(player.getRow(), player.getColumn() + j) == 'X')
+        for (int j = player.getColumn() + 1; j <= player.getColumn() + 3 && j < maze.getSize(); j++){
+            if (maze.getMaze(player.getRow(), j) == 'X')
                 break;
-            if (dragonAt(player.getRow(), player.getColumn() + j)){
+            if (dragonAt(player.getRow(), j, true)){
                 return true;
             }
         }
 
-        for (int j = 1; j <= 3; j++){
-            if (maze.getMaze(player.getRow(), player.getColumn() - j) == 'X')
+        for (int j = player.getColumn() - 1; j >= player.getColumn() - 3 && j > 0; j--){
+            if (maze.getMaze(player.getRow(), j) == 'X')
                 break;
-            if (dragonAt(player.getRow(), player.getColumn() - j)){
+            if (dragonAt(player.getRow(), j, true)){
                 return true;
             }
         }
@@ -364,10 +322,86 @@ public class Game {
         return false;
     }
 
-    public boolean dragonAt(int row, int column){
+    public void dragonMovement(Dragon drag, int num){
+        switch (num){
+            case 0: // Move left
+                if(maze.getMaze(drag.getRow(), drag.getColumn() - 1) == ' ' && !dragonAt(drag.getRow(), drag.getColumn() - 1, false))
+                    drag.setColumn(drag.getColumn() - 1);
+                break;
+            case 1: // Move right
+                if(maze.getMaze(drag.getRow(), drag.getColumn() + 1) == ' ' && !dragonAt(drag.getRow(), drag.getColumn() + 1, false))
+                    drag.setColumn(drag.getColumn() + 1);
+                break;
+            case 2: // Move up
+                if(maze.getMaze(drag.getRow() - 1, drag.getColumn()) == ' ' && !dragonAt(drag.getRow() - 1, drag.getColumn(), false))
+                    drag.setRow(drag.getRow() - 1);
+                break;
+            case 3: // Move down
+                if(maze.getMaze(drag.getRow() + 1, drag.getColumn()) == ' ' && !dragonAt(drag.getRow() + 1, drag.getColumn(), false))
+                    drag.setRow(drag.getRow() + 1);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public void printBoard() {
+        // insert the sword on the map
+        if (player.getHero() != 'A')
+            maze.setMaze(sword.getRow(),sword.getColumn(), 'E');
+
+        for (Darts weapon : darts){
+            if (weapon.isVisible())
+                maze.setMaze(weapon.getRow(), weapon.getColumn(), 'W');
+        }
+
+        if(shield.isVisible())
+            maze.setMaze(shield.getRow(), shield.getColumn(), 's');
+
+        for(Dragon d : dragons){
+            // insert the Dragon on the map
+            if (d.isAlive())
+                maze.setMaze(d.getRow(),d.getColumn(), d.getDragon());
+
+            // check if the Dragon is in the same place as the sword and change that location to 'F'
+            if (d.getRow() == sword.getRow() && d.getColumn() == sword.getColumn())
+                maze.setMaze(d.getRow(),d.getColumn(), 'F');
+
+        }
+
+        // insert the hero on the map
+        maze.setMaze(player.getRow(), player.getColumn(), player.getHero());
+
+        Interface.printInventory(player);
+        Interface.printMap(maze.getMaze(), maze.getSize());
+
+        // reset the board
+        for(Dragon d : dragons){
+            maze.setMaze(d.getRow(), d.getColumn(), ' ');
+        }
+
+        for (Darts weapon : darts){
+            maze.setMaze(weapon.getRow(), weapon.getColumn(), ' ');
+        }
+
+        if(shield.isVisible())
+            maze.setMaze(shield.getRow(), shield.getColumn(), ' ');
+
+        maze.setMaze(sword.getRow(), sword.getColumn(), ' ');
+        maze.setMaze(player.getRow(), player.getColumn(), ' ');
+    }
+
+    public boolean dragonAt(int row, int column, boolean checkAsleep){
         for (Dragon d : dragons){
-            if(d.getRow() == row && d.getColumn() == column && d.isAlive()){
-                return true;
+            if(checkAsleep){
+                if(d.getRow() == row && d.getColumn() == column && d.isAlive() && !d.isAsleep()){
+                    return true;
+                }
+            }
+            else {
+                if(d.getRow() == row && d.getColumn() == column && d.isAlive()){
+                    return true;
+                }
             }
         }
         return false;
@@ -397,15 +431,11 @@ public class Game {
         return player;
     }
 
-    public int getTime() {
-        return time;
-    }
-
-    public boolean isDeadDragons() {
+    public boolean isAllDragonsDead() {
         return deadDragons;
     }
 
-    public int getNumberDragonsAlive(){
+    public int updateDragonsAlive(){
         int numberOfAliveDragons = 0;
         for(Dragon d : dragons){
             if(d.isAlive())
@@ -434,4 +464,44 @@ public class Game {
         }
         return false;
     }
+
+    public void save() throws IOException {
+        ObjectOutputStream os= null;
+        try {
+            os= new ObjectOutputStream(
+                    new FileOutputStream("file.dat"));
+            os.writeObject(this);
+            System.out.println("Saved.");
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (os!= null)
+                os.close();
+        }
+
+    }
+
+    public Game load() throws IOException {
+        ObjectInputStream is = null;
+        Game game = null;
+        try {
+            is = new ObjectInputStream(
+                    new FileInputStream("file.dat"));
+            game = (Game) is.readObject();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        finally {
+            if (is != null)
+                is.close();
+        }
+        return game;
+    }
+
 }

@@ -4,7 +4,6 @@ import maze.logic.Game;
 import maze.logic.weapons.Darts;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 public class Test2 {
 
@@ -14,7 +13,7 @@ public class Test2 {
         int iniRow = game.getDragons()[0].getRow();
         int iniColumn = game.getDragons()[0].getColumn();
 
-        game.getDragons()[0].dragonMovement(game.getMaze(),3); // move down
+        game.dragonMovement(game.getDragons()[0],3); // move down
 
         assertEquals(iniRow + 1, game.getDragons()[0].getRow());
         assertEquals(iniColumn, game.getDragons()[0].getColumn());
@@ -26,7 +25,7 @@ public class Test2 {
         int iniRow = game.getDragons()[0].getRow();
         int iniColumn = game.getDragons()[0].getColumn();
 
-        game.getDragons()[0].dragonMovement(game.getMaze(),1); // move down
+        game.dragonMovement(game.getDragons()[0], 1); // move down
 
         assertEquals(iniRow, game.getDragons()[0].getRow());
         assertEquals(iniColumn, game.getDragons()[0].getColumn());
@@ -43,7 +42,7 @@ public class Test2 {
 
     @org.junit.Test
     public void testMultipleDragons() {
-        Game game = new Game(21,10);
+        Game game = new Game(21,10,0);
 
         assertEquals(10, game.getDragons().length);
     }
@@ -62,8 +61,9 @@ public class Test2 {
         Game game = new Game();
 
         game.setShield(1,2);
+        game.getShield().setVisible(true);
         game.getPlayer().newPosition(game.getMaze(),false,"r");
-        game.updateGame('m',0);
+        game.updateGame('m');
 
         assertEquals(1, game.getPlayer().getInventory(0));
     }
@@ -80,7 +80,7 @@ public class Test2 {
             return;
         }
         game.getPlayer().newPosition(game.getMaze(),false,"r");
-        game.updateGame('m',0);
+        game.updateGame('m');
 
         assertEquals(1, game.getPlayer().getInventory(1));
     }
@@ -88,14 +88,12 @@ public class Test2 {
     @org.junit.Test
     public void testShootDarts() {
         Game game = new Game();
+        game.getDragons()[0].setRow(6);
+        game.getPlayer().setInventory(1, 2);
 
-        game.getPlayer().setInventory(1,2);
-
-        //int test1 = game.shoot('d');
-
-        //TODO this test
-
+        game.updateGame('d');
         assertEquals(1, game.getPlayer().getInventory(1));
+        assertEquals(false, game.getDragons()[0].isAlive());
     }
 
 }

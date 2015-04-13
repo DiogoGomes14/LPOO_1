@@ -1,8 +1,9 @@
 package maze.logic;
 
+import java.io.Serializable;
 import java.util.Random;
 
-public class Dragon extends Maze {
+public class Dragon extends Maze implements Serializable{
     protected boolean alive = true;
     private int timeSleep = 0;
     private char dragon = 'D';
@@ -10,30 +11,6 @@ public class Dragon extends Maze {
     public Dragon(){
         this.column = 0;
         this.row = 0;
-    }
-
-    public void dragonMovement(Maze maze, int num){
-
-        switch (num){
-            case 0: // Move left
-                if(maze.getMaze(row, column - 1) == ' ')
-                    column--;
-                break;
-            case 1: // Move right
-                if(maze.getMaze(row, column + 1) == ' ')
-                    column++;
-                break;
-            case 2: // Move up
-                if(maze.getMaze(row - 1, column) == ' ')
-                    row--;
-                break;
-            case 3: // Move down
-                if(maze.getMaze(row + 1,column) == ' ')
-                    row++;
-                break;
-            default:
-                break;
-        }
     }
 
     public int sleepCalculation(int time){
@@ -67,8 +44,8 @@ public class Dragon extends Maze {
         this.dragon =  dragon;
     }
 
-    public int getTimeSleep(){
-        return timeSleep;
+    public boolean isAsleep(){
+        return dragon == 'd';
     }
     public void setTimeSleep(int timeSleep){
         this.timeSleep = timeSleep;

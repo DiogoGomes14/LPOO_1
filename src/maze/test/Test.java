@@ -6,7 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
 public class Test {
-    // TODO: change the hard implemented values to be dynamic
 
     @org.junit.Test
     public void testSimpleMove() {
@@ -36,7 +35,7 @@ public class Test {
         game.getPlayer().setRow(7);
 
         game.getPlayer().newPosition(game.getMaze(),false,"d");
-        game.updateGame('m' ,0);
+        game.updateGame('m');
 
         assertEquals('A', game.getPlayer().getHero());
     }
@@ -48,7 +47,7 @@ public class Test {
         game.getPlayer().setColumn(1);
         game.getPlayer().setRow(2);
 
-        assertEquals(false, game.updateGame('m', 0));
+        assertEquals('D', game.updateGame('m'));
     }
 
     @org.junit.Test
@@ -58,8 +57,12 @@ public class Test {
         game.getPlayer().setColumn(1);
         game.getPlayer().setRow(2);
         game.getPlayer().setHero('A');
+        game.getPlayer().setInventory(0,1);
+        game.getDragons()[0].setColumn(1);
+        game.getDragons()[0].setRow(3);
+        game.getDragons()[0].setTimeSleep(10);
 
-        assertEquals(true, game.updateGame('m', 0));
+        assertEquals('C', game.updateGame('m'));
     }
 
     @org.junit.Test
@@ -72,7 +75,7 @@ public class Test {
 
         game.getPlayer().newPosition(game.getMaze(),true,"r");
 
-        game.updateGame('m',0);
+        game.updateGame('m');
 
         assertEquals(game.getMaze().getRow(), game.getPlayer().getRow());
         assertEquals(game.getMaze().getColumn(), game.getPlayer().getColumn());
